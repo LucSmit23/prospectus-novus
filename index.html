@@ -298,12 +298,11 @@ async function storeSet(key, obj){
     const { error } = await window.db
       .from("users")
       .upsert(obj, { onConflict: "email" });
-
-    if(error){
-      console.error(error);
-      return null;
-    }
-
+if (error) {
+    alert("SAVE USER ERROR:\n" + JSON.stringify(error, null, 2));
+    console.error(error);
+    return null;
+}
     return obj;
   }
 
@@ -380,10 +379,10 @@ async function getUser(email){
         .eq("email", email.trim().toLowerCase())
         .single();
 
-    if(error){
-        return null;
-    }
-
+  if (error) {
+    alert("GET USER ERROR:\n" + JSON.stringify(error, null, 2));
+    return null;
+}
     return data;
 }
 async function saveUser(u){
