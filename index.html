@@ -292,12 +292,66 @@ function nowStamp(){
 
 /* ---------------- storage helpers ---------------- */
 async function storeSet(key, obj){
-  try{ return await window.storage.set(key, JSON.stringify(obj), true); }
-  catch(e){ console.error("storage.set failed", key, e); return null; }
-}
-async function storeGet(key){
-  try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }
-  catch(e){ return null; }
+
+  // USER
+  if(key.startsWith("user:")){
+    const { error } = await window.db
+      .from("users")
+      .upsert(obj, { onConflict: "email" });
+
+    if(error){
+      console.error(error);
+      return null;
+    }
+
+    return obj;
+  }
+
+  // PLAN
+  if(key.startsWith("plan:")){
+    const { error } = await window.db
+      .from("plans")
+      .upsert({
+        id: obj.id,
+        teacheremail: obj.teacherEmail,
+        teachername: obj.teacherName,
+        submittedbyname: obj.submittedByName,
+        term: obj.term,
+        atpweek: obj.atpWeek,
+        dates: obj.dates,
+        lessons: obj.lessons,
+        timetable: obj.timetable,
+        createdat: obj.createdAt,
+        data: obj
+      });
+
+    if(error){
+      console.error(error);
+      return null;
+    }
+
+    return obj;
+  }
+
+  // TIMETABLE
+  if(key.startsWith("timetable:")){
+    const { error } = await window.db
+      .from("timetables")
+      .upsert({
+        email: obj.email,
+        timetable: obj.timetable,
+        updatedat: Date.now()
+      });
+
+    if(error){
+      console.error(error);
+      return null;
+    }
+
+    return obj;
+  }
+
+  return null;
 }
 async function storeDelete(key){
   try{ return await window.storage.delete(key, true); } catch(e){ return null; }
@@ -318,9 +372,48 @@ async function storeListValues(prefix){
 function userKey(email){ return "user:"+email.trim().toLowerCase(); }
 function planKey(email,id){ return "plan:"+email.trim().toLowerCase()+":"+id; }
 
-async function getUser(email){ return storeGet(userKey(email)); }
-async function saveUser(u){ return storeSet(userKey(u.email), u); }
-async function listAllUsers(){ return storeListValues("user:"); }
+async function getUser(email){
+
+    const { data, error } = await window.db
+        .from("users")
+        .select("*")
+        .eq("email", email.trim().toLowerCase())
+        .single();
+
+    if(error){
+        return null;
+    }
+
+    return data;
+}
+async function saveUser(u){
+
+    const { error } = await window.db
+        .from("users")
+        .upsert([u], {
+            onConflict: "email"
+        });
+
+    if(error){
+        console.error(error);
+        return null;
+    }
+
+    return u;
+}
+async function listAllUsers(){
+
+    const { data, error } = await window.db
+        .from("users")
+        .select("*");
+
+    if(error){
+        console.error(error);
+        return [];
+    }
+
+    return data || [];
+}
 async function savePlan(p){ return storeSet(planKey(p.teacherEmail,p.id), p); }
 async function listPlansForTeacher(email){
   const list = await storeListValues("plan:"+email.trim().toLowerCase()+":");
