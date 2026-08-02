@@ -372,17 +372,17 @@ function userKey(email){ return "user:"+email.trim().toLowerCase(); }
 function planKey(email,id){ return "plan:"+email.trim().toLowerCase()+":"+id; }
 
 async function getUser(email){
-
     const { data, error } = await window.db
         .from("users")
         .select("*")
         .eq("email", email.trim().toLowerCase())
-        .single();
+        .maybeSingle();
 
-  if (error) {
-    alert("GET USER ERROR:\n" + JSON.stringify(error, null, 2));
-    return null;
-}
+    if (error) {
+        alert("GET USER ERROR:\n" + JSON.stringify(error, null, 2));
+        return null;
+    }
+
     return data;
 }
 async function saveUser(u){
