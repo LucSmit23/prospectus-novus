@@ -633,14 +633,23 @@ function bindAuthEvents(){
       }
 
       btnReg.disabled = true; btnReg.textContent = "Creating…";
-      const existing = await getUser(email);
-      if(existing){
-        btnReg.disabled = false; btnReg.textContent = "Create profile";
-        showAuthError("An account with this email already exists. Please log in instead.");
-        return;
-      }
-      await saveUser(payload);
-      btnReg.disabled = false; btnReg.textContent = "Create profile";
+const existing = await getUser(email);
+
+if (existing) {
+    btnReg.disabled = false;
+    btnReg.textContent = "Create profile";
+    showAuthError("An account with this email already exists. Please log in instead.");
+    return;
+}
+
+alert("About to save user");
+
+await saveUser(payload);
+
+alert("saveUser finished");
+
+btnReg.disabled = false;
+btnReg.textContent = "Create profile"; btnReg.textContent = "Create profile";
       state.currentUser = payload;
       state.screen = 'app';
       state.appTab = 'profile';
