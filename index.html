@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospectus Novus — Catch-up Plan Portal</title>
+<style>
+  :root{
+    --maroon:#902444;
+    --maroon-dark:#6c1a34;
+    --maroon-deep:#4f1226;
+    --maroon-tint:#f7ebee;
+    --maroon-tint-2:#f0dbe1;
+    --cream:#fbf8f6;
+    --paper:#ffffff;
+    --ink:#221c1e;
+    --ink-soft:#6e6265;
+    --line:#e6dcd9;
+    --success:#2c6e49;
+    --success-bg:#e7f3ea;
+    --warn:#a8721f;
+    --warn-bg:#fbf0dd;
+    --radius:10px;
+    --serif: Georgia, 'Times New Roman', Times, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--serif); margin:0; color:var(--maroon-deep); font-weight:700;}
+  a{color:var(--maroon);}
+  button{font-family:var(--sans); cursor:pointer;}
+  input,select,textarea{font-family:var(--sans); font-size:14.5px;}
+  ::selection{background:var(--maroon-tint-2);}
+
+  .visually-hidden{position:absolute; width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 18px; border-radius:8px; border:1.5px solid transparent;
+    font-size:14px; font-weight:600; letter-spacing:.1px; transition:.15s ease;
+    background:var(--maroon); color:#fff;
+  }
+  .btn:hover{background:var(--maroon-dark);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn.secondary{background:#fff; color:var(--maroon); border-color:var(--maroon);}
+  .btn.secondary:hover{background:var(--maroon-tint);}
+  .btn.ghost{background:transparent; color:var(--ink-soft); border-color:var(--line);}
+  .btn.ghost:hover{background:#f2ecea; color:var(--ink);}
+  .btn.small{padding:6px 12px; font-size:12.5px; border-radius:7px;}
+  .btn.danger{background:#fff; color:#a33; border-color:#e3c6c6;}
+  .btn.danger:hover{background:#fdeeee;}
+  .btn.block{width:100%;}
+
+  /* ---------- Shield / crest ---------- */
+  .crest svg{display:block;}
+
+  /* ---------- Top bar (app) ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 22px; background:var(--paper); border-bottom:2px solid var(--maroon);
+  }
+  .topbar-left{display:flex; align-items:center; gap:12px;}
+  .brandmark{display:flex; flex-direction:column; line-height:1.1;}
+  .brandmark .name{font-family:var(--serif); font-weight:700; font-size:17px; letter-spacing:.5px; color:var(--maroon-deep);}
+  .brandmark .tag{font-size:10px; color:var(--ink-soft); letter-spacing:.4px; text-transform:uppercase;}
+  .topbar-right{display:flex; align-items:center; gap:14px;}
+  .userpill{display:flex; align-items:center; gap:9px; padding:5px 12px 5px 6px; border-radius:999px; background:var(--maroon-tint); border:1px solid var(--maroon-tint-2);}
+  .userpill .avatar{width:26px;height:26px;border-radius:50%; background:var(--maroon); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700;}
+  .userpill .meta{display:flex; flex-direction:column; line-height:1.15;}
+  .userpill .meta .n{font-size:12.5px; font-weight:700; color:var(--ink);}
+  .userpill .meta .r{font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.4px;}
+
+  /* ---------- App shell ---------- */
+  .shell{display:flex; min-height:calc(100vh - 53px);}
+  .sidenav{
+    width:220px; flex-shrink:0; background:var(--paper); border-right:1px solid var(--line);
+    padding:18px 12px;
+  }
+  .sidenav .navgroup-label{font-size:10.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--ink-soft); padding:10px 10px 6px;}
+  .navbtn{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    padding:10px 12px; border-radius:8px; border:none; background:transparent;
+    color:var(--ink); font-size:14px; font-weight:600; margin-bottom:2px;
+  }
+  .navbtn:hover{background:var(--maroon-tint);}
+  .navbtn.active{background:var(--maroon); color:#fff;}
+  .navbtn .dot{width:6px;height:6px;border-radius:50%; background:currentColor; opacity:.55;}
+  .main{flex:1; padding:26px 30px 60px; max-width:1180px;}
+
+  /* ---------- Cards / panels ---------- */
+  .panel{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; margin-bottom:20px;}
+  .panel-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px;}
+  .panel-head h2{font-size:19px;}
+  .panel-head p{margin:4px 0 0; color:var(--ink-soft); font-size:13.5px;}
+  .subtle{color:var(--ink-soft); font-size:13px;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:5px;}
+  .field .req{color:var(--maroon);}
+  .field input[type=text], .field input[type=email], .field input[type=password], .field input[type=date], .field input[type=number], .field select, .field textarea{
+    width:100%; padding:9px 11px; border:1.5px solid var(--line); border-radius:7px; background:#fff; color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--maroon);}
+  .field textarea{resize:vertical; min-height:64px;}
+  .field.error input, .field.error select, .field.error textarea{border-color:#c25050; background:#fff7f7;}
+  .field .errmsg{color:#a33; font-size:11.5px; margin-top:4px; display:none;}
+  .field.error .errmsg{display:block;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+
+  .errorbanner{background:#fdecec; border:1px solid #eec2c2; color:#8a2f2f; padding:12px 14px; border-radius:8px; font-size:13px; margin-bottom:16px; display:none;}
+  .errorbanner.show{display:block;}
+  .okbanner{background:var(--success-bg); border:1px solid #cfe6d7; color:var(--success); padding:12px 14px; border-radius:8px; font-size:13px; margin-bottom:16px;}
+
+  /* ---------- Badges ---------- */
+  .badge{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.2px;}
+  .badge.ok{background:var(--success-bg); color:var(--success);}
+  .badge.warn{background:var(--warn-bg); color:var(--warn);}
+  .badge.neutral{background:#eee; color:#666;}
+
+  /* ---------- Auth screen ---------- */
+  .authwrap{min-height:100vh; display:flex; align-items:stretch; justify-content:center; padding:34px 18px;}
+  .authcard{display:flex; width:100%; max-width:920px; margin:auto; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(76,20,40,.14); border:1px solid var(--line);}
+  .authbrand{width:40%; background:linear-gradient(165deg, var(--maroon) 0%, var(--maroon-deep) 100%); color:#fff; padding:38px 30px; display:flex; flex-direction:column; justify-content:space-between;}
+  .authbrand .crest{margin-bottom:18px;}
+  .authbrand h1{color:#fff; font-size:23px; letter-spacing:.6px; line-height:1.25;}
+  .authbrand .sub{font-size:12px; opacity:.88; margin-top:8px; letter-spacing:.3px;}
+  .authbrand .contact{font-size:11.5px; opacity:.85; line-height:1.7; margin-top:26px;}
+  .authbrand .contact div b{font-weight:700; opacity:.95;}
+  .authform{width:60%; background:#fff; padding:34px 34px 30px;}
+  .tabs{display:flex; gap:4px; background:var(--maroon-tint); padding:4px; border-radius:9px; margin-bottom:22px;}
+  .tabbtn{flex:1; padding:9px 8px; border:none; background:transparent; border-radius:7px; font-size:13px; font-weight:700; color:var(--maroon-dark);}
+  .tabbtn.active{background:var(--maroon); color:#fff;}
+  .authtitle{font-size:19px; margin-bottom:3px;}
+  .authswitch{margin-top:16px; font-size:13px; color:var(--ink-soft); text-align:center;}
+  .authswitch button{background:none;border:none;color:var(--maroon); font-weight:700; padding:0;}
+
+  /* ---------- Timetable ---------- */
+  .day-block{border:1px solid var(--line); border-radius:9px; margin-bottom:14px; overflow:hidden;}
+  .day-head{display:flex; align-items:center; justify-content:space-between; background:var(--maroon-tint); padding:9px 14px;}
+  .day-head h4{font-size:13.5px; color:var(--maroon-deep); letter-spacing:.3px;}
+  .period-row{display:grid; grid-template-columns:1.1fr 1fr 1.4fr 34px; gap:8px; padding:8px 14px; border-top:1px solid var(--line); align-items:center;}
+  .period-row input{padding:7px 9px; border:1.3px solid var(--line); border-radius:6px; font-size:13px;}
+  .period-row .rm{background:none;border:none;color:#a35;font-size:16px; font-weight:700; width:28px; height:28px; border-radius:6px;}
+  .period-row .rm:hover{background:#fdeaea;}
+  .addperiod{padding:9px 14px;}
+
+  /* ---------- Date chips ---------- */
+  .datechips{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 4px;}
+  .chip{display:flex; align-items:center; gap:8px; background:var(--maroon-tint); border:1px solid var(--maroon-tint-2); color:var(--maroon-deep); padding:6px 8px 6px 12px; border-radius:999px; font-size:12.5px; font-weight:700;}
+  .chip button{background:none; border:none; color:var(--maroon); font-weight:900; width:18px;height:18px; border-radius:50%;}
+  .chip button:hover{background:#fff;}
+
+  /* ---------- Lesson block ---------- */
+  .lesson-card{border:1.5px solid var(--line); border-radius:10px; padding:16px 16px 14px; margin-bottom:14px; background:#fffdfc;}
+  .lesson-card .lhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .lesson-card .lhead .lh-l{display:flex; align-items:center; gap:10px;}
+  .lesson-card .lhead .badgeicon{width:26px;height:26px;flex-shrink:0;}
+  .lesson-card .lhead h4{font-size:14px; color:var(--ink);}
+  .lesson-card .lhead .lsub{font-size:12px; color:var(--ink-soft);}
+  .completed-toggle{display:flex; gap:8px; margin-bottom:12px;}
+  .toggle-opt{flex:1; text-align:center; padding:9px; border-radius:7px; border:1.5px solid var(--line); font-size:13px; font-weight:700; color:var(--ink-soft); background:#fff;}
+  .toggle-opt.sel-yes{border-color:var(--success); color:var(--success); background:var(--success-bg);}
+  .toggle-opt.sel-no{border-color:var(--warn); color:var(--warn); background:var(--warn-bg);}
+  .catchup-fields{border-top:1px dashed var(--line); padding-top:12px; margin-top:4px;}
+
+  .periodpicklist{display:flex; flex-direction:column; gap:8px;}
+  .periodpick{display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:8px; padding:10px 12px;}
+  .periodpick.checked{border-color:var(--maroon); background:var(--maroon-tint);}
+  .periodpick .pp-info{flex:1; font-size:13px;}
+  .periodpick .pp-info b{color:var(--ink);}
+  .periodpick input[type=checkbox]{width:18px;height:18px; accent-color:var(--maroon);}
+
+  .counter-pill{display:inline-flex; align-items:center; gap:6px; background:var(--maroon-tint); color:var(--maroon-deep); font-weight:700; font-size:12.5px; padding:6px 12px; border-radius:999px;}
+  .counter-pill.full{background:var(--warn-bg); color:var(--warn);}
+
+  /* ---------- Tables ---------- */
+  table.list{width:100%; border-collapse:collapse; font-size:13.5px;}
+  table.list th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--ink-soft); padding:9px 10px; border-bottom:2px solid var(--line);}
+  table.list td{padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  table.list tr:hover td{background:#faf6f5;}
+  .emptystate{text-align:center; padding:40px 20px; color:var(--ink-soft);}
+  .emptystate .crest{opacity:.35; margin:0 auto 12px;}
+
+  .filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .filters input, .filters select{padding:8px 10px; border:1.5px solid var(--line); border-radius:7px; font-size:13px;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(40,20,26,.45); z-index:100; display:flex; align-items:flex-start; justify-content:center; padding:34px 16px; overflow:auto;}
+  .modal{background:#fff; border-radius:12px; width:100%; max-width:760px; max-height:none; box-shadow:0 30px 70px rgba(0,0,0,.3);}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); position:sticky; top:0; background:#fff; border-radius:12px 12px 0 0;}
+  .modal-body{padding:20px;}
+  .modal-close{background:none;border:none;font-size:20px; color:var(--ink-soft); width:32px;height:32px;border-radius:8px;}
+  .modal-close:hover{background:#f2ecea;}
+
+  .kv-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;}
+  .kv{background:var(--maroon-tint); border-radius:8px; padding:10px 12px;}
+  .kv .k{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--maroon-dark); font-weight:700;}
+  .kv .v{font-size:14px; color:var(--ink); margin-top:2px; font-weight:600;}
+
+  .plandoc-lesson{border:1.5px solid var(--line); border-radius:9px; padding:14px; margin-bottom:12px; break-inside:avoid;}
+  .plandoc-lesson .plh{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .plandoc-lesson .plh .t{font-weight:700; font-size:13.5px;}
+  .plandoc-lesson dl{margin:0; display:grid; grid-template-columns:170px 1fr; gap:6px 10px; font-size:13px;}
+  .plandoc-lesson dt{color:var(--ink-soft); font-weight:600;}
+  .plandoc-lesson dd{margin:0;}
+
+  .banner-note{background:var(--maroon-tint); border:1px solid var(--maroon-tint-2); color:var(--maroon-deep); font-size:12.5px; padding:10px 14px; border-radius:8px; margin-bottom:16px;}
+
+  /* ---------- Print ---------- */
+  #printArea{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block; position:absolute; top:0; left:0; width:100%; padding:10mm;}
+    .no-print{display:none !important;}
+  }
+  .print-letterhead{display:flex; align-items:center; gap:16px; border-bottom:2.5px solid var(--maroon); padding-bottom:12px; margin-bottom:16px;}
+  .print-letterhead h1{font-size:20px; letter-spacing:1px;}
+  .print-letterhead .ptag{font-size:10.5px; letter-spacing:.3px; color:var(--ink-soft); margin-top:2px;}
+  .print-letterhead .pcontact{margin-left:auto; text-align:right; font-size:10px; color:var(--ink-soft); line-height:1.6;}
+
+  @media (max-width: 900px){
+    .shell{flex-direction:column;}
+    .sidenav{width:100%; display:flex; overflow-x:auto; border-right:none; border-bottom:1px solid var(--line); padding:10px;}
+    .navbtn{white-space:nowrap;}
+    .main{padding:18px 14px 50px;}
+    .authcard{flex-direction:column; max-width:480px;}
+    .authbrand, .authform{width:100%;}
+    .row2, .row3, .kv-grid{grid-template-columns:1fr;}
+    .period-row{grid-template-columns:1fr;}
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="printArea"></div>
+
+<script>
+const SUPABASE_URL = 'https://vbggqralpqhioejsunng.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_JCGWtb8AXGXr2zEq3AipuA_MQzE0PAC';
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+/* =========================================================================
+   PROSPECTUS NOVUS — Catch-up Plan Portal
+   Single-file app. Data is stored via window.storage (shared = school-wide).
+   ========================================================================= */
+
+const SMT_ACCESS_CODE = "PNSMT2026"; // share this with department heads / principal only
+
+const DEPARTMENTS = ["Foundation Phase","Intersen Phase","ASD Unit"];
+const POSITIONS = ["Principal","Deputy Principal","Head of Department – Foundation Phase","Head of Department – Intersen Phase","Head of Department – ASD Unit","SMT Member"];
+const TERMS = ["Term 1","Term 2","Term 3","Term 4"];
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+const CATCHUP_METHODS = ["Extra lesson / support period","Homework task","Google Classroom / online task","Peer tutoring / buddy support","Covered in next lesson (extended)","Other (specify in details)"];
+const MAX_LESSONS = 12;
+
+/* ---------------- utilities ---------------- */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,9); }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(name){ return (name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase(); }
+function fmtDate(iso){
+  if(!iso) return "";
+  const d = new Date(iso+"T00:00:00");
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('en-ZA', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+}
+function weekdayName(iso){
+  const d = new Date(iso+"T00:00:00");
+  if(isNaN(d)) return "";
+  const names = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  return names[d.getDay()];
+}
+function nowStamp(){
+  return new Date().toLocaleString('en-ZA', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+}
+
+/* ---------------- storage helpers ---------------- */
+async function storeSet(key, obj){
+  try{ return await window.storage.set(key, JSON.stringify(obj), true); }
+  catch(e){ console.error("storage.set failed", key, e); return null; }
+}
+async function storeGet(key){
+  try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }
+  catch(e){ return null; }
+}
+async function storeDelete(key){
+  try{ return await window.storage.delete(key, true); } catch(e){ return null; }
+}
+async function storeListValues(prefix){
+  try{
+    const r = await window.storage.list(prefix, true);
+    if(!r || !r.keys) return [];
+    const out = [];
+    for(const k of r.keys){
+      const v = await storeGet(k);
+      if(v) out.push(v);
+    }
+    return out;
+  }catch(e){ return []; }
+}
+
+function userKey(email){ return "user:"+email.trim().toLowerCase(); }
+function planKey(email,id){ return "plan:"+email.trim().toLowerCase()+":"+id; }
+
+async function getUser(email){ return storeGet(userKey(email)); }
+async function saveUser(u){ return storeSet(userKey(u.email), u); }
+async function listAllUsers(){ return storeListValues("user:"); }
+async function savePlan(p){ return storeSet(planKey(p.teacherEmail,p.id), p); }
+async function listPlansForTeacher(email){
+  const list = await storeListValues("plan:"+email.trim().toLowerCase()+":");
+  return list.sort((a,b)=> b.createdAt - a.createdAt);
+}
+async function listAllPlans(){
+  const list = await storeListValues("plan:");
+  return list.sort((a,b)=> b.createdAt - a.createdAt);
+}
+
+/* ---------------- app state ---------------- */
+const state = {
+  screen: 'auth',            // 'auth' | 'app'
+  authTab: 'educator',       // 'educator' | 'smt'
+  authMode: 'login',         // 'login' | 'register'
+  currentUser: null,
+  appTab: null,               // set on login
+  draftPlan: null,            // in-progress new plan
+  allUsersCache: [],
+  allPlansCache: [],
+};
+
+const root = document.getElementById('app');
+
+/* ---------------- crest / shield mark (actual school badge) ---------------- */
+const CREST_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACgCAYAAADuIpVSAAAHmElEQVR42u2d25HkIAxFZ6hOZUKZeDaWjmdD2WC8X13lchkM6OoBuvrcnbaNOEhCCPg+juOLQkFLoQooBItCsCi55SV9wPvnN02Q9uff328iYwRWNoVnGUjSPqUrpDDGohAsCsGiUAgWhWBRCBaFQrAoBItCsCgUgkUhWBSCRaEQLA/JVCIklRc7jLItWCvJCrVnEQYqXeEDRDWQ3j+/By0twRKN/DNcZ6BYqkywxC6uFyJaMYJFIVg21krq2mitEoHVCsC9ZmUZAv/twZIE2k+/mYEjS+CfwhW2OvM645NYp6dnZZpNpo6xWh2M6PzMMReDdwBUDNoJVhUeqZuq/T4rdLRYQPdHy5UcLG2rQqtFi0UhWBSCRSFYWRrainPQCUvLdxGs4HCtMOskWBvMFJHwZiwITAkW800Ea3m4spYvp96lo1ltkL0entu/wIBxgwXBarrHEUAIU3KwtAAYideYx2LAzkCeYMWHK5u7ZB6LUBGsFeHKGtinXtLRhivzbDH9WqEWXNlTEFyEphAsb6v12a6POpmGYAUX7c2lI2ct7LDRFdGGbSzWLlZil5KerVyh975Ayft3O4FmuxjL49giWqlEwbs1XDPv2/mcrIJQaFTlzFgvq7ZovSdKX7yiAKCpkA9c3krPVGufuh4L1dEtq7gaTKgQInUFqeaWr+zCzDslLliRA/hMEqkPwlgsrq/t1Qd0hZT4s8L3z+8hoV7TpWqf2uftsqKFIiWCoikM3imMr+xdYWR3iHZdkVxPxBl5iUw9ZU2owrpCArq+vovGRzJZSnlFHkWeJSyI02a0vx/xfC3v8NKCgnGJ/Mo6phsWGU2eFZvokunI1koVLNRHo7ZTRbEYCMBWsH6qs8IIFZs7lU2vFK4Ui871UMIqMc2ul26WlUfFalZKar1WaldZSfk7KX60jci2WQz4YqEsblqI0+lWXsTMYml2/G45oh1uaC2rjUKuI66hu2LZKAuXuJusao1Z6JcEKuvBaAoWrVYOqNwsFuHafzJiDhYaht3girSbaDmLRbj2tVTuwfsuI5PphWBgaVSIEi5aLDUQVoVrt0FWdlMooYoxuNzByu4Sdx1Y38dx0BJ0wll73izI0XZ8b2WxMig5Y3tDHbyWBa4McWWoRejd4dIqm454G0fI6oYd4eKG1QBWa8Vne0EVNY4Me9oMr9Rduy0lstI84UJdfJl1gKidNvNRqPR0P+3RvvtlSdp95GaxpApecQOq9veucD1wia7o1fbZESrjGEsKl/bMamQJp9bJhMopeI8Ml6TjLNz1SlC5zApXg+tp4dmis1aD6hYsi9GHCOg94foATqjq77gtmzn/kWZJiPRQf4tcznlK7jE7tTj9D9HH12eUnh9nzvV43Scd+UjJHiaqhX6tH/Y2GJW97rEm0ePDiJZq5F2jPJSZl6Gt2OyzrJc1rN4XCaqnvq79/rE0WWJ1rICxtFxRKxWQukZ4GhhY3kq2gisiWBH7qGszhWeQPaJsi5lipCLEyP1SNBtu3ZGW+SVC1ZairQCr6W2E74ymC8+BMLyvMII1GJkeR61eWPHigJFvntqwGuleGuu4y/qmjZV0PeUKNdyNNLvcu1wRKeayggq5JWzmOaIt9hpuQasoEOUatYsWUc/3Po5TfHaDdgNmnt96lhdYGpsutG92legKciiIxwm/s7NEKVweAKB1YhHuwE6biXAUUW8pscQtStfhRsudV9G9GlgRR81TnDVjvSSWMnL6A61z01vsR2ubEAWHPTNGi1Ocz6sC1lWho+XWCClWo+dqJaIkCJHLQBanvox+68hgRmb1zYL3WnyDDIZH3KD0b2a/Z9YlSmejVnqGuMLZeEMKmZaLnHFXmhZKCkNNT6N6NkuQoioUax2IzhXNgFhTqjQIf/oW5JLR07eiy5chrnDUWl0hqlkrxOYFFAzaMzlEpryl0x7XrbWL5yXpPOkW9KcPnlU8OvMcMVUw4wl6/x/h6gtC8SgoWvkl6YxL+ttodV69k4jPv33aMNIO9yWdmdHn4SKtgm7NuKmmkzv9PFlczXyWW+a9BQ5SSV6gaceIVz09zQa1d6ZD0w2zeROp9bmDTFp3NRr/WcZ1PWkQSUZfw3qrLenUOroVB0Sq77Le9Vx733ml4gzXeTnq7v9626IVEhRthd0pqrV00OMGR0CIFnTXOl7rOz2gUgerZ0Y1Y62uf3v32zO8kpkROmZDJC1bzzgP3NZg09ZB8RypVwDu/n40BTGSn7kDTqrw63OR6Rqpi7dMm5iWzfRYqDuArm6xZz2v1gmtIH2k8qJnNtszqbi2Z9Ry93yrRzjgeid0yx08mXPtWKT27pobluy+kSxBebu8MBYLEWPVlNV61p17Qi8TXS3ezG8Q1oZX9w6OrrvR2RPIj1ouVD5s1K22BkfPd0Vaenp9BRNJamHWBaHd7d1s9A6Up+TnyudVhAMLmYbwltH81Ox6a0QJC1ZLecjaJbQF07KCq52iU74WFFT5h6TOqidHJT3fM1rctJXFQliHmc0eUmuKWmhfVeBlM1FiG2140Qdw7HZg3JZgRQ/qdwQpJVgRQNsdJIKlDFw2gAgWhekGCsGiUG7lP7v5On+fQtPhAAAAAElFTkSuQmCC";
+
+function crestSVG(size, onDark){
+  size = size || 48;
+  const h = Math.round(size*1.2);
+  const img = `<img src="${CREST_DATA_URI}" alt="Prospectus Novus crest" style="display:block; width:${size}px; height:${h}px; object-fit:contain;">`;
+  if(onDark){
+    const pad = Math.max(6, Math.round(size*0.16));
+    return `<div class="crest" style="width:${size+pad*2}px;"><div style="background:#fff; border-radius:12px; padding:${pad}px; display:inline-flex; box-shadow:0 6px 18px rgba(0,0,0,.18);">${img}</div></div>`;
+  }
+  return `<div class="crest" style="width:${size}px;">${img}</div>`;
+}
+
+/* ---------------- render root switch ---------------- */
+function render(){
+  if(state.screen === 'auth'){ root.innerHTML = renderAuth(); bindAuthEvents(); }
+  else { root.innerHTML = renderApp(); bindAppEvents(); }
+}
+
+/* =========================================================================
+   AUTH SCREEN
+   ========================================================================= */
+function renderAuth(){
+  const tab = state.authTab;
+  const mode = state.authMode;
+  return `
+  <div class="authwrap">
+    <div class="authcard">
+      <div class="authbrand">
+        <div>
+          ${crestSVG(56,"#ffffff")}
+          <h1>Prospectus Novus</h1>
+          <div class="sub">Skool vir leerders met leerhindernisse<br>School for learners with barriers to learning</div>
+        </div>
+        <div class="contact">
+          <div><b>Catch-up Plan Portal</b></div>
+          <div style="margin-top:10px;">Telephone: (012) 335-5109 / (012) 335-4322<br>Telefoon: (012) 335-3336<br>Fax: (012) 335-3370</div>
+          <div style="margin-top:10px;">admin@prospectusnovus.co.za<br>Fred Nicholson Street, Mayville, Pretoria<br>P.O. Box 30164, Wonderboompoort 0033</div>
+        </div>
+      </div>
+      <div class="authform">
+        <div class="tabs">
+          <button class="tabbtn ${tab==='educator'?'active':''}" data-authtab="educator">Educator</button>
+          <button class="tabbtn ${tab==='smt'?'active':''}" data-authtab="smt">SMT / Department Head</button>
+        </div>
+        ${mode==='login' ? renderLoginForm(tab) : renderRegisterForm(tab)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLoginForm(tab){
+  return `
+  <h3 class="authtitle">${tab==='educator'?'Educator log in':'SMT log in'}</h3>
+  <p class="subtle" style="margin:0 0 18px;">${tab==='educator'?'Log in to create and manage your catch-up plans.':'Log in to view and download catch-up plans submitted by educators.'}</p>
+  <div id="authError" class="errorbanner"></div>
+  <div class="field"><label>Email <span class="req">*</span></label><input type="email" id="loginEmail" placeholder="you@prospectusnovus.co.za"></div>
+  <div class="field"><label>Password <span class="req">*</span></label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+  <button class="btn block" id="btnLogin">Log in</button>
+  <div class="authswitch">No profile yet? <button id="toRegister">Create a profile</button></div>
+  `;
+}
+
+function renderRegisterForm(tab){
+  if(tab==='educator'){
+    return `
+    <h3 class="authtitle">Create your educator profile</h3>
+    <p class="subtle" style="margin:0 0 18px;">Set this up once — your details will be filled in automatically on every catch-up plan.</p>
+    <div id="authError" class="errorbanner"></div>
+    <div class="field"><label>Full name <span class="req">*</span></label><input type="text" id="regName" placeholder="e.g. M. van der Merwe"></div>
+    <div class="field"><label>Email <span class="req">*</span></label><input type="email" id="regEmail" placeholder="you@prospectusnovus.co.za"></div>
+    <div class="row2">
+      <div class="field"><label>Department <span class="req">*</span></label>
+        <select id="regDept"><option value="">Choose…</option>${DEPARTMENTS.map(d=>`<option value="${d}">${d}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Password <span class="req">*</span></label><input type="password" id="regPassword" placeholder="Choose a password"></div>
+    </div>
+    <button class="btn block" id="btnRegister">Create profile</button>
+    <div class="authswitch">Already have a profile? <button id="toLogin">Log in</button></div>
+    `;
+  }
+  return `
+  <h3 class="authtitle">Create your SMT profile</h3>
+  <p class="subtle" style="margin:0 0 18px;">For principals, deputies and department heads who review catch-up plans.</p>
+  <div id="authError" class="errorbanner"></div>
+  <div class="field"><label>Full name <span class="req">*</span></label><input type="text" id="regName" placeholder="e.g. Mr. P. Botha"></div>
+  <div class="field"><label>Email <span class="req">*</span></label><input type="email" id="regEmail" placeholder="you@prospectusnovus.co.za"></div>
+  <div class="row2">
+    <div class="field"><label>Position <span class="req">*</span></label>
+      <select id="regPosition"><option value="">Choose…</option>${POSITIONS.map(d=>`<option value="${d}">${d}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>Password <span class="req">*</span></label><input type="password" id="regPassword" placeholder="Choose a password"></div>
+  </div>
+  <div class="field"><label>SMT access code <span class="req">*</span></label><input type="text" id="regAccessCode" placeholder="Provided by the principal"></div>
+  <button class="btn block" id="btnRegister">Create profile</button>
+  <div class="authswitch">Already have a profile? <button id="toLogin">Log in</button></div>
+  `;
+}
+
+function showAuthError(msg){
+  const el = document.getElementById('authError');
+  if(el){ el.textContent = msg; el.classList.add('show'); }
+}
+
+function bindAuthEvents(){
+  document.querySelectorAll('[data-authtab]').forEach(b=>{
+    b.addEventListener('click', ()=>{ state.authTab = b.dataset.authtab; state.authMode='login'; render(); });
+  });
+  const toReg = document.getElementById('toRegister');
+  if(toReg) toReg.addEventListener('click', ()=>{ state.authMode='register'; render(); });
+  const toLog = document.getElementById('toLogin');
+  if(toLog) toLog.addEventListener('click', ()=>{ state.authMode='login'; render(); });
+
+  const btnLogin = document.getElementById('btnLogin');
+  if(btnLogin){
+    btnLogin.addEventListener('click', async ()=>{
+      const email = document.getElementById('loginEmail').value.trim();
+      const pw = document.getElementById('loginPassword').value;
+      if(!email || !pw){ showAuthError("Please enter your email and password."); return; }
+      btnLogin.disabled = true; btnLogin.textContent = "Logging in…";
+      const u = await getUser(email);
+      btnLogin.disabled = false; btnLogin.textContent = "Log in";
+      if(!u){ showAuthError("No profile found for that email. Please create a profile first."); return; }
+      if(u.password !== pw){ showAuthError("Incorrect password. Please try again."); return; }
+      if(u.role !== state.authTab){ showAuthError(`This email is registered as ${u.role==='smt'?'SMT':'an educator'}. Please use the ${u.role==='smt'?'SMT':'Educator'} tab.`); return; }
+      state.currentUser = u;
+      state.screen = 'app';
+      state.appTab = 'newplan';
+      render();
+    });
+  }
+
+  const btnReg = document.getElementById('btnRegister');
+  if(btnReg){
+    btnReg.addEventListener('click', async ()=>{
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const pw = document.getElementById('regPassword').value;
+      if(!name || !email || !pw){ showAuthError("Please fill in all required fields."); return; }
+      if(pw.length < 4){ showAuthError("Please choose a password with at least 4 characters."); return; }
+
+      let payload;
+      if(state.authTab==='educator'){
+        const dept = document.getElementById('regDept').value;
+        if(!dept){ showAuthError("Please choose your department."); return; }
+        payload = { role:'educator', name, email, password:pw, department:dept, timetable:{}, createdAt:Date.now() };
+      } else {
+        const position = document.getElementById('regPosition').value;
+        const code = document.getElementById('regAccessCode').value.trim();
+        if(!position){ showAuthError("Please choose your position."); return; }
+        if(code !== SMT_ACCESS_CODE){ showAuthError("Incorrect SMT access code. Please check with the principal."); return; }
+        payload = { role:'smt', name, email, password:pw, position, createdAt:Date.now() };
+      }
+
+      btnReg.disabled = true; btnReg.textContent = "Creating…";
+      const existing = await getUser(email);
+      if(existing){
+        btnReg.disabled = false; btnReg.textContent = "Create profile";
+        showAuthError("An account with this email already exists. Please log in instead.");
+        return;
+      }
+      await saveUser(payload);
+      btnReg.disabled = false; btnReg.textContent = "Create profile";
+      state.currentUser = payload;
+      state.screen = 'app';
+      state.appTab = 'profile';
+      render();
+    });
+  }
+}
+
+/* =========================================================================
+   APP SHELL
+   ========================================================================= */
+function renderApp(){
+  const u = state.currentUser;
+  const isSmt = u.role === 'smt';
+  const personalNav = [
+    {id:'newplan', label:'New Catch-up Plan'},
+    {id:'myplans', label:'My Catch-up Plans'},
+    {id:'profile', label:'My Profile & Timetable'},
+  ];
+  const smtNav = [
+    {id:'allplans', label:'All Catch-up Plans'},
+    {id:'teachers', label:'Educators'},
+  ];
+
+  return `
+  <div class="topbar">
+    <div class="topbar-left">
+      ${crestSVG(34)}
+      <div class="brandmark"><span class="name">Prospectus Novus</span><span class="tag">Catch-up Plan Portal</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="userpill">
+        <div class="avatar">${initials(u.name)}</div>
+        <div class="meta"><span class="n">${esc(u.name)}</span><span class="r">${u.role==='smt' ? esc(u.position||'SMT') : esc(u.department)}</span></div>
+      </div>
+      <button class="btn ghost small" id="btnLogout">Log out</button>
+    </div>
+  </div>
+  <div class="shell">
+    <div class="sidenav">
+      <div class="navgroup-label">${isSmt?'My Catch-up Plans':'Educator'}</div>
+      ${personalNav.map(n=>`<button class="navbtn ${state.appTab===n.id?'active':''}" data-tab="${n.id}"><span class="dot"></span>${n.label}</button>`).join('')}
+      ${isSmt ? `
+      <div class="navgroup-label" style="margin-top:10px;">SMT Overview</div>
+      ${smtNav.map(n=>`<button class="navbtn ${state.appTab===n.id?'active':''}" data-tab="${n.id}"><span class="dot"></span>${n.label}</button>`).join('')}
+      ` : ``}
+    </div>
+    <div class="main" id="mainArea">
+      ${renderTabContent()}
+    </div>
+  </div>
+  <div id="modalRoot"></div>
+  `;
+}
+
+function renderTabContent(){
+  const tab = state.appTab;
+  if(tab==='newplan') return renderNewPlanTab();
+  if(tab==='myplans') return `<div id="myplansWrap">${loadingPanel()}</div>`;
+  if(tab==='profile') return renderProfileTab();
+  if(tab==='allplans') return `<div id="allplansWrap">${loadingPanel()}</div>`;
+  if(tab==='teachers') return `<div id="teachersWrap">${loadingPanel()}</div>`;
+  return '';
+}
+function loadingPanel(){ return `<div class="panel"><p class="subtle">Loading…</p></div>`; }
+
+function bindAppEvents(){
+  document.getElementById('btnLogout').addEventListener('click', ()=>{
+    state.currentUser = null; state.screen = 'auth'; state.authMode='login'; state.draftPlan=null;
+    render();
+  });
+  document.querySelectorAll('.navbtn').forEach(b=>{
+    b.addEventListener('click', ()=>{ state.appTab = b.dataset.tab; state.draftPlan=null; render(); });
+  });
+
+  const tab = state.appTab;
+  if(tab==='newplan') bindNewPlanEvents();
+  if(tab==='profile') bindProfileEvents();
+  if(tab==='myplans') loadMyPlans();
+  if(tab==='allplans') loadAllPlans();
+  if(tab==='teachers') loadTeachers();
+}
+
+/* =========================================================================
+   PROFILE & TIMETABLE (educator)
+   ========================================================================= */
+function ensureTimetableShape(tt){
+  tt = tt || {};
+  DAYS.forEach(d=>{ if(!Array.isArray(tt[d])) tt[d] = []; });
+  return tt;
+}
+
+function renderProfileTab(){
+  const u = state.currentUser;
+  const tt = ensureTimetableShape(u.timetable);
+  return `
+  <div class="panel">
+    <div class="panel-head">
+      <div><h2>My profile</h2><p>These details are filled in automatically on every catch-up plan you submit.</p></div>
+    </div>
+    <div id="profileError" class="errorbanner"></div>
+    <div class="row3">
+      <div class="field"><label>Full name</label><input type="text" id="pfName" value="${esc(u.name)}"></div>
+      <div class="field"><label>Email</label><input type="text" value="${esc(u.email)}" disabled></div>
+      ${u.role==='smt' ? `<div class="field"><label>SMT position</label><input type="text" value="${esc(u.position||'')}" disabled></div>` : ``}
+    </div>
+    <div class="field" style="max-width:340px;">
+      <label>${u.role==='smt' ? 'Department / phase you teach in (used on your own catch-up plans)' : 'Department'}</label>
+      <select id="pfDept">${DEPARTMENTS.map(d=>`<option value="${d}" ${u.department===d?'selected':''}>${d}</option>`).join('')}</select>
+    </div>
+    <button class="btn secondary small" id="btnSaveProfile">Save profile details</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div><h2>My timetable</h2><p>Add each period you teach per day, with the grade and subject. This lets your catch-up plans fill in automatically — edit it any time your timetable changes.</p></div>
+    </div>
+    <div id="timetableWrap">
+      ${DAYS.map(day=>renderDayBlock(day, tt[day])).join('')}
+    </div>
+    <div class="banner-note">Tip: you only need to set this up once. If your timetable changes, come back to this page and edit it — new catch-up plans will use the updated version.</div>
+    <button class="btn small" id="btnSaveTimetable">Save timetable</button>
+  </div>
+  `;
+}
+
+function renderDayBlock(day, periods){
+  return `
+  <div class="day-block" data-day="${day}">
+    <div class="day-head"><h4>${day}</h4><span class="subtle">${periods.length} period${periods.length===1?'':'s'}</span></div>
+    <div class="periods-list">
+      ${periods.map(p=>renderPeriodRow(day,p)).join('')}
+    </div>
+    <div class="addperiod"><button class="btn ghost small" data-addperiod="${day}">+ Add period</button></div>
+  </div>`;
+}
+function renderPeriodRow(day, p){
+  return `
+  <div class="period-row" data-day="${day}" data-pid="${p.id}">
+    <input type="text" class="pt-period" placeholder="Period name (e.g. Period 1)" value="${esc(p.period||'')}">
+    <input type="text" class="pt-grade" placeholder="Grade (e.g. Grade 4)" value="${esc(p.grade||'')}">
+    <input type="text" class="pt-subject" placeholder="Subject (e.g. Mathematics)" value="${esc(p.subject||'')}">
+    <button class="rm" data-rmperiod="${day}|${p.id}" title="Remove period">×</button>
+  </div>`;
+}
+
+function bindProfileEvents(){
+  document.getElementById('btnSaveProfile').addEventListener('click', async ()=>{
+    const name = document.getElementById('pfName').value.trim();
+    const dept = document.getElementById('pfDept').value;
+    const errEl = document.getElementById('profileError');
+    if(!name){ errEl.textContent="Please enter your name."; errEl.classList.add('show'); return; }
+    errEl.classList.remove('show');
+    state.currentUser.name = name;
+    state.currentUser.department = dept;
+    await saveUser(state.currentUser);
+    render();
+  });
+
+  document.querySelectorAll('[data-addperiod]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const day = b.dataset.addperiod;
+      const tt = ensureTimetableShape(state.currentUser.timetable);
+      tt[day].push({id:uid(), period:`Period ${tt[day].length+1}`, grade:'', subject:''});
+      state.currentUser.timetable = tt;
+      render();
+    });
+  });
+  document.querySelectorAll('[data-rmperiod]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const [day,pid] = b.dataset.rmperiod.split('|');
+      const tt = ensureTimetableShape(state.currentUser.timetable);
+      tt[day] = tt[day].filter(p=>p.id!==pid);
+      state.currentUser.timetable = tt;
+      render();
+    });
+  });
+
+  const btnSaveTT = document.getElementById('btnSaveTimetable');
+  if(btnSaveTT){
+    btnSaveTT.addEventListener('click', async ()=>{
+      const tt = ensureTimetableShape({});
+      document.querySelectorAll('.day-block').forEach(block=>{
+        const day = block.dataset.day;
+        const rows = block.querySelectorAll('.period-row');
+        rows.forEach(row=>{
+          const pid = row.dataset.pid;
+          tt[day].push({
+            id: pid,
+            period: row.querySelector('.pt-period').value.trim(),
+            grade: row.querySelector('.pt-grade').value.trim(),
+            subject: row.querySelector('.pt-subject').value.trim(),
+          });
+        });
+      });
+      state.currentUser.timetable = tt;
+      btnSaveTT.disabled = true; btnSaveTT.textContent = "Saving…";
+      await saveUser(state.currentUser);
+      btnSaveTT.disabled = false; btnSaveTT.textContent = "Saved ✓";
+      setTimeout(()=>{ if(document.getElementById('btnSaveTimetable')) document.getElementById('btnSaveTimetable').textContent = "Save timetable"; }, 1600);
+    });
+  }
+}
+
+/* =========================================================================
+   NEW CATCH-UP PLAN (educator)
+   ========================================================================= */
+function freshDraft(){
+  const u = state.currentUser;
+  return {
+    id: uid(),
+    teacherEmail: u.email,
+    teacherName: u.name,
+    department: u.department || DEPARTMENTS[0],
+    term: '',
+    atpWeek: '',
+    dates: [],       // array of ISO date strings
+    lessons: [],      // { id, date, day, period, grade, subject, topic, completed, method, details, resources, dueDate, manual }
+  };
+}
+
+function renderNewPlanTab(){
+  if(!state.draftPlan) state.draftPlan = freshDraft();
+  const d = state.draftPlan;
+  const tt = ensureTimetableShape(state.currentUser.timetable);
+  const lessonCount = d.lessons.length;
+
+  return `
+  <div class="panel">
+    <div class="panel-head">
+      <div><h2>New catch-up plan</h2><p>Complete this for each day you are / were absent. A catch-up plan is only required where the work has not yet been completed. Covers up to ${MAX_LESSONS} lessons.</p></div>
+      <span class="counter-pill ${lessonCount>=MAX_LESSONS?'full':''}" id="lessonCounter">${lessonCount} / ${MAX_LESSONS} lessons</span>
+    </div>
+    <div id="planError" class="errorbanner"></div>
+
+    <div class="row3">
+      <div class="field"><label>Teacher name</label><input type="text" value="${esc(d.teacherName)}" disabled></div>
+      <div class="field"><label>Email</label><input type="text" value="${esc(d.teacherEmail)}" disabled></div>
+      <div class="field"><label>Department <span class="req">*</span></label>
+        <select id="planDept">${DEPARTMENTS.map(x=>`<option value="${x}" ${d.department===x?'selected':''}>${x}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Term <span class="req">*</span></label>
+        <select id="planTerm"><option value="">Choose…</option>${TERMS.map(t=>`<option value="${t}" ${d.term===t?'selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>ATP Week <span class="req">*</span></label><input type="text" id="planAtp" placeholder="e.g. Week 5" value="${esc(d.atpWeek)}"></div>
+    </div>
+
+    <div class="field">
+      <label>Date(s) of absence <span class="req">*</span></label>
+      <div style="display:flex; gap:8px;">
+        <input type="date" id="planDateInput" style="max-width:220px;">
+        <button class="btn secondary small" id="btnAddDate">+ Add date</button>
+      </div>
+      <div class="datechips" id="dateChips">
+        ${d.dates.length===0 ? '<span class="subtle">No dates added yet.</span>' : d.dates.map(dt=>`
+          <span class="chip">${fmtDate(dt)}<button data-rmdate="${dt}">×</button></span>
+        `).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div id="lessonSections">
+    ${d.dates.length===0 ? `
+      <div class="panel"><div class="emptystate">${crestSVG(46)}<p>Add at least one date of absence above to load your lessons for that day.</p></div></div>
+    ` : d.dates.map(dt=>renderDateLessonSection(dt, tt, d)).join('')}
+  </div>
+
+  <div class="panel" style="display:flex; align-items:center; justify-content:space-between;">
+    <p class="subtle" style="margin:0;">All fields marked <span class="req">*</span> must be completed before submitting.</p>
+    <button class="btn" id="btnSubmitPlan">Submit catch-up plan</button>
+  </div>
+  `;
+}
+
+function renderDateLessonSection(dateIso, tt, draft){
+  const day = weekdayName(dateIso);
+  const periods = tt[day] || [];
+  const lessonsForDate = draft.lessons.filter(l=>l.date===dateIso);
+  const checkedIds = new Set(lessonsForDate.map(l=>l.period));
+
+  return `
+  <div class="panel" data-datesection="${dateIso}">
+    <div class="panel-head">
+      <div><h2 style="font-size:16px;">${fmtDate(dateIso)} <span class="subtle" style="font-weight:400;">(${day})</span></h2></div>
+    </div>
+    ${periods.length===0 ? `
+      <div class="banner-note">No timetable saved for ${day}. Add it under <b>My Profile &amp; Timetable</b>, or add a lesson manually below.</div>
+      <button class="btn secondary small" data-manualadd="${dateIso}">+ Add lesson manually</button>
+    ` : `
+      <div class="periodpicklist">
+        ${periods.map(p=>`
+          <label class="periodpick ${checkedIds.has(p.period)?'checked':''}">
+            <input type="checkbox" data-pickperiod data-date="${dateIso}" data-day="${day}" data-period="${esc(p.period)}" data-grade="${esc(p.grade)}" data-subject="${esc(p.subject)}" ${checkedIds.has(p.period)?'checked':''}>
+            <span class="pp-info"><b>${esc(p.period)}</b> — ${esc(p.grade)||'<i>grade not set</i>'} · ${esc(p.subject)||'<i>subject not set</i>'}</span>
+          </label>
+        `).join('')}
+      </div>
+    `}
+    <div id="lessonsFor-${dateIso}" style="margin-top:14px;">
+      ${lessonsForDate.map(l=>renderLessonCard(l)).join('')}
+    </div>
+  </div>
+  `;
+}
+
+function badgeIcon(status){
+  const color = status==='no' ? '#a8721f' : (status==='yes' ? '#2c6e49' : '#c8b9be');
+  return `<svg viewBox="0 0 100 116" width="24" height="28"><path d="M50 2 L96 14 V56 C96 86 76 104 50 114 C24 104 4 86 4 56 V14 Z" fill="${color}"/></svg>`;
+}
+
+function renderLessonCard(l){
+  return `
+  <div class="lesson-card" data-lessonid="${l.id}">
+    <div class="lhead">
+      <div class="lh-l">
+        <span class="badgeicon">${badgeIcon(l.completed)}</span>
+        <div><h4>${esc(l.period)} — ${esc(l.grade)||'Grade —'} ${esc(l.subject)||''}</h4><div class="lsub">${fmtDate(l.date)}</div></div>
+      </div>
+      <button class="btn danger small" data-rmlesson="${l.id}">Remove</button>
+    </div>
+    <div class="field ${l._err_topic?'error':''}">
+      <label>What was the class working on / meant to cover in this lesson? <span class="req">*</span></label>
+      <textarea data-field="topic" data-lessonid="${l.id}" placeholder="e.g. Fractions — adding fractions with the same denominator">${esc(l.topic)}</textarea>
+      <div class="errmsg">This field is required.</div>
+    </div>
+    <div class="field">
+      <label>Was the work completed before your absence? <span class="req">*</span></label>
+      <div class="completed-toggle">
+        <button type="button" class="toggle-opt ${l.completed==='yes'?'sel-yes':''}" data-setcompleted="yes" data-lessonid="${l.id}">Yes — work was completed</button>
+        <button type="button" class="toggle-opt ${l.completed==='no'?'sel-no':''}" data-setcompleted="no" data-lessonid="${l.id}">No — catch-up needed</button>
+      </div>
+    </div>
+    ${l.completed==='no' ? `
+    <div class="catchup-fields">
+      <div class="row2">
+        <div class="field ${l._err_method?'error':''}">
+          <label>How will learners catch up? <span class="req">*</span></label>
+          <select data-field="method" data-lessonid="${l.id}">
+            <option value="">Choose…</option>
+            ${CATCHUP_METHODS.map(m=>`<option value="${m}" ${l.method===m?'selected':''}>${m}</option>`).join('')}
+          </select>
+          <div class="errmsg">Please choose a catch-up method.</div>
+        </div>
+        <div class="field ${l._err_due?'error':''}">
+          <label>Catch-up to be completed by <span class="req">*</span></label>
+          <input type="date" data-field="dueDate" data-lessonid="${l.id}" value="${esc(l.dueDate)}">
+          <div class="errmsg">Please set a target date.</div>
+        </div>
+      </div>
+      <div class="field ${l._err_details?'error':''}">
+        <label>Catch-up plan details <span class="req">*</span></label>
+        <textarea data-field="details" data-lessonid="${l.id}" placeholder="Describe exactly what learners will do to catch up on this lesson">${esc(l.details)}</textarea>
+        <div class="errmsg">Please describe the catch-up plan.</div>
+      </div>
+      <div class="field ${l._err_resources?'error':''}">
+        <label>Resources / worksheets learners will need <span class="req">*</span></label>
+        <textarea data-field="resources" data-lessonid="${l.id}" placeholder="e.g. Worksheet 4B, textbook p.32, link to Google Classroom task">${esc(l.resources)}</textarea>
+        <div class="errmsg">Please list the resources needed.</div>
+      </div>
+    </div>
+    ` : (l.completed==='yes' ? `<div class="banner-note">No catch-up plan required — work was completed before the absence.</div>` : '')}
+  </div>`;
+}
+
+function findLesson(id){ return state.draftPlan.lessons.find(l=>l.id===id); }
+
+function bindNewPlanEvents(){
+  const d = state.draftPlan;
+
+  const deptSel = document.getElementById('planDept');
+  if(deptSel) deptSel.addEventListener('change', ()=>{ d.department = deptSel.value; });
+  const termSel = document.getElementById('planTerm');
+  if(termSel) termSel.addEventListener('change', ()=>{ d.term = termSel.value; });
+  const atpInput = document.getElementById('planAtp');
+  if(atpInput) atpInput.addEventListener('input', ()=>{ d.atpWeek = atpInput.value; });
+
+  const btnAddDate = document.getElementById('btnAddDate');
+  if(btnAddDate){
+    btnAddDate.addEventListener('click', ()=>{
+      const val = document.getElementById('planDateInput').value;
+      const errEl = document.getElementById('planError');
+      if(!val){ errEl.textContent="Please choose a date first."; errEl.classList.add('show'); return; }
+      if(d.dates.includes(val)){ errEl.textContent="That date has already been added."; errEl.classList.add('show'); return; }
+      errEl.classList.remove('show');
+      d.dates.push(val);
+      d.dates.sort();
+      render();
+    });
+  }
+  document.querySelectorAll('[data-rmdate]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const dt = b.dataset.rmdate;
+      d.dates = d.dates.filter(x=>x!==dt);
+      d.lessons = d.lessons.filter(l=>l.date!==dt);
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-manualadd]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      if(d.lessons.length >= MAX_LESSONS) return;
+      const dateIso = b.dataset.manualadd;
+      const period = prompt("Period name (e.g. Period 3):","");
+      if(period===null) return;
+      const grade = prompt("Grade (e.g. Grade 5):","") || "";
+      const subject = prompt("Subject (e.g. Natural Sciences):","") || "";
+      d.lessons.push({ id:uid(), date:dateIso, day:weekdayName(dateIso), period:period||"Lesson", grade, subject, topic:'', completed:'', method:'', dueDate:'', details:'', resources:'', manual:true });
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-pickperiod]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const {date, day, period, grade, subject} = cb.dataset;
+      if(cb.checked){
+        if(d.lessons.length >= MAX_LESSONS){ cb.checked = false; alert(`You can log up to ${MAX_LESSONS} lessons in one catch-up plan.`); return; }
+        d.lessons.push({ id:uid(), date, day, period, grade, subject, topic:'', completed:'', method:'', dueDate:'', details:'', resources:'' });
+      } else {
+        d.lessons = d.lessons.filter(l=>!(l.date===date && l.period===period));
+      }
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-rmlesson]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      d.lessons = d.lessons.filter(l=>l.id!==b.dataset.rmlesson);
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-setcompleted]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const l = findLesson(b.dataset.lessonid);
+      l.completed = b.dataset.setcompleted;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-field]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const l = findLesson(inp.dataset.lessonid);
+      if(l) l[inp.dataset.field] = inp.value;
+    });
+    inp.addEventListener('change', ()=>{
+      const l = findLesson(inp.dataset.lessonid);
+      if(l) l[inp.dataset.field] = inp.value;
+    });
+  });
+
+  document.getElementById('btnSubmitPlan').addEventListener('click', submitPlan);
+}
+
+function validateDraft(){
+  const d = state.draftPlan;
+  let ok = true;
+  const errors = [];
+  if(!d.term){ ok=false; errors.push("Please choose a term."); }
+  if(!d.atpWeek || !d.atpWeek.trim()){ ok=false; errors.push("Please enter the ATP week."); }
+  if(d.dates.length===0){ ok=false; errors.push("Please add at least one date of absence."); }
+  if(d.lessons.length===0){ ok=false; errors.push("Please select or add at least one lesson."); }
+
+  d.lessons.forEach(l=>{
+    l._err_topic = l._err_method = l._err_due = l._err_details = l._err_resources = false;
+    if(!l.topic || !l.topic.trim()){ ok=false; l._err_topic=true; }
+    if(!l.completed){ ok=false; }
+    if(l.completed==='no'){
+      if(!l.method){ ok=false; l._err_method=true; }
+      if(!l.dueDate){ ok=false; l._err_due=true; }
+      if(!l.details || !l.details.trim()){ ok=false; l._err_details=true; }
+      if(!l.resources || !l.resources.trim()){ ok=false; l._err_resources=true; }
+    }
+  });
+  if(d.lessons.some(l=>!l.completed)) errors.push("Please mark whether work was completed before the absence, for every lesson.");
+  if(!ok && errors.length===0) errors.push("Please complete all required fields, highlighted in red below.");
+  return {ok, errors};
+}
+
+async function submitPlan(){
+  const {ok, errors} = validateDraft();
+  const errEl = document.getElementById('planError');
+  if(!ok){
+    errEl.innerHTML = errors.map(e=>`• ${esc(e)}`).join('<br>');
+    errEl.classList.add('show');
+    render();
+    errEl.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  const d = state.draftPlan;
+  d.createdAt = Date.now();
+  d.submittedByName = state.currentUser.name;
+  d.teacherName = state.currentUser.name;
+  d.teacherEmail = state.currentUser.email;
+
+  const btn = document.getElementById('btnSubmitPlan');
+  btn.disabled = true; btn.textContent = "Submitting…";
+  await savePlan(d);
+  btn.disabled = false;
+
+  const submittedPlan = d;
+  state.draftPlan = null;
+  state.appTab = 'myplans';
+  render();
+  setTimeout(()=>{
+    const wrap = document.getElementById('myplansWrap');
+    if(wrap) wrap.insertAdjacentHTML('afterbegin', `<div class="okbanner">Catch-up plan submitted successfully for ${submittedPlan.dates.length} day(s) and ${submittedPlan.lessons.length} lesson(s).</div>`);
+  }, 300);
+}
+
+/* =========================================================================
+   MY PLANS (educator)
+   ========================================================================= */
+async function loadMyPlans(){
+  const wrap = document.getElementById('myplansWrap');
+  const plans = await listPlansForTeacher(state.currentUser.email);
+  wrap.innerHTML = renderPlansPanel(plans, {showTeacher:false});
+  bindPlansListEvents(plans);
+}
+
+function renderPlansPanel(plans, opts){
+  opts = opts || {};
+  if(plans.length===0){
+    return `<div class="panel"><div class="emptystate">${crestSVG(46)}<p>No catch-up plans yet.</p></div></div>`;
+  }
+  return `
+  <div class="panel">
+    <div class="panel-head"><div><h2>${opts.showTeacher?'All catch-up plans':'My catch-up plans'}</h2><p>${plans.length} plan${plans.length===1?'':'s'} on record</p></div></div>
+    <table class="list">
+      <thead><tr>
+        ${opts.showTeacher?'<th>Teacher</th><th>Department</th>':''}
+        <th>Term / Week</th><th>Dates</th><th>Lessons</th><th>Status</th><th>Submitted</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${plans.map(p=>{
+          const pending = p.lessons.filter(l=>l.completed==='no').length;
+          return `<tr data-viewplan="${p.teacherEmail}|${p.id}">
+            ${opts.showTeacher?`<td>${esc(p.teacherName)}</td><td>${esc(p.department)}</td>`:''}
+            <td>${esc(p.term)} · ${esc(p.atpWeek)}</td>
+            <td>${p.dates.map(fmtDate).join(', ')}</td>
+            <td>${p.lessons.length}</td>
+            <td>${pending>0 ? `<span class="badge warn">${pending} need${pending===1?'s':''} catch-up</span>` : `<span class="badge ok">All completed</span>`}</td>
+            <td>${new Date(p.createdAt).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'})}</td>
+            <td><button class="btn secondary small" data-viewbtn="${p.teacherEmail}|${p.id}">View</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function bindPlansListEvents(plans){
+  document.querySelectorAll('[data-viewbtn]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const [email,id] = b.dataset.viewbtn.split('|');
+      const plan = plans.find(p=>p.teacherEmail===email && p.id===id);
+      if(plan) openPlanModal(plan);
+    });
+  });
+}
+
+/* =========================================================================
+   SMT: ALL PLANS / TEACHERS
+   ========================================================================= */
+async function loadAllPlans(){
+  const wrap = document.getElementById('allplansWrap');
+  const [plans, users] = await Promise.all([listAllPlans(), listAllUsers()]);
+  state.allPlansCache = plans;
+  state.allUsersCache = users;
+  wrap.innerHTML = renderAllPlansUI(plans);
+  bindAllPlansEvents(plans);
+}
+
+function renderAllPlansUI(plans){
+  return `
+  <div class="panel">
+    <div class="panel-head"><div><h2>All catch-up plans</h2><p>Every plan submitted across the school, including your own.</p></div></div>
+    <div class="filters">
+      <input type="text" id="filterName" placeholder="Search teacher name…">
+      <select id="filterDept"><option value="">All departments</option>${DEPARTMENTS.map(d=>`<option value="${d}">${d}</option>`).join('')}</select>
+      <select id="filterTerm"><option value="">All terms</option>${TERMS.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+      <select id="filterStatus"><option value="">All statuses</option><option value="pending">Needs catch-up</option><option value="done">All completed</option></select>
+    </div>
+    <div id="allPlansTableWrap"></div>
+  </div>`;
+}
+
+function bindAllPlansEvents(plans){
+  function applyFilters(){
+    const name = document.getElementById('filterName').value.trim().toLowerCase();
+    const dept = document.getElementById('filterDept').value;
+    const term = document.getElementById('filterTerm').value;
+    const status = document.getElementById('filterStatus').value;
+    let filtered = plans.filter(p=>{
+      if(name && !p.teacherName.toLowerCase().includes(name)) return false;
+      if(dept && p.department!==dept) return false;
+      if(term && p.term!==term) return false;
+      if(status){
+        const pending = p.lessons.some(l=>l.completed==='no');
+        if(status==='pending' && !pending) return false;
+        if(status==='done' && pending) return false;
+      }
+      return true;
+    });
+    const tw = document.getElementById('allPlansTableWrap');
+    tw.innerHTML = renderPlansPanelInner(filtered, {showTeacher:true});
+    bindPlansListEvents(filtered);
+  }
+  ['filterName','filterDept','filterTerm','filterStatus'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', applyFilters);
+    document.getElementById(id).addEventListener('change', applyFilters);
+  });
+  applyFilters();
+}
+
+// like renderPlansPanel but without the outer .panel wrapper (used inside filtered SMT view)
+function renderPlansPanelInner(plans, opts){
+  if(plans.length===0) return `<div class="emptystate">${crestSVG(40)}<p>No catch-up plans match these filters.</p></div>`;
+  return `
+    <table class="list">
+      <thead><tr>
+        ${opts.showTeacher?'<th>Teacher</th><th>Department</th>':''}
+        <th>Term / Week</th><th>Dates</th><th>Lessons</th><th>Status</th><th>Submitted</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${plans.map(p=>{
+          const pending = p.lessons.filter(l=>l.completed==='no').length;
+          return `<tr>
+            ${opts.showTeacher?`<td>${esc(p.teacherName)}</td><td>${esc(p.department)}</td>`:''}
+            <td>${esc(p.term)} · ${esc(p.atpWeek)}</td>
+            <td>${p.dates.map(fmtDate).join(', ')}</td>
+            <td>${p.lessons.length}</td>
+            <td>${pending>0 ? `<span class="badge warn">${pending} need${pending===1?'s':''} catch-up</span>` : `<span class="badge ok">All completed</span>`}</td>
+            <td>${new Date(p.createdAt).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'})}</td>
+            <td><button class="btn secondary small" data-viewbtn="${p.teacherEmail}|${p.id}">View</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function loadTeachers(){
+  const wrap = document.getElementById('teachersWrap');
+  const users = await listAllUsers();
+  const educators = users.filter(u=>u.role==='educator');
+  wrap.innerHTML = `
+  <div class="panel">
+    <div class="panel-head"><div><h2>Educators</h2><p>${educators.length} educator profile${educators.length===1?'':'s'} on record</p></div></div>
+    ${educators.length===0 ? `<div class="emptystate">${crestSVG(40)}<p>No educator profiles yet.</p></div>` : `
+    <table class="list">
+      <thead><tr><th>Name</th><th>Department</th><th>Email</th><th>Timetable set up</th><th></th></tr></thead>
+      <tbody>
+        ${educators.map(e=>{
+          const tt = ensureTimetableShape(e.timetable);
+          const periodCount = DAYS.reduce((s,d)=>s+tt[d].length,0);
+          return `<tr>
+            <td>${esc(e.name)}</td><td>${esc(e.department)}</td><td>${esc(e.email)}</td>
+            <td>${periodCount>0?`<span class="badge ok">${periodCount} periods</span>`:`<span class="badge neutral">Not set up</span>`}</td>
+            <td><button class="btn secondary small" data-viewteacher="${e.email}">View plans</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`}
+  </div>`;
+
+  document.querySelectorAll('[data-viewteacher]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      state.appTab = 'allplans';
+      render();
+      setTimeout(()=>{
+        const fn = document.getElementById('filterName');
+        if(fn){
+          const ed = educators.find(e=>e.email===b.dataset.viewteacher);
+          fn.value = ed ? ed.name : '';
+          fn.dispatchEvent(new Event('input'));
+        }
+      }, 50);
+    });
+  });
+}
+
+/* =========================================================================
+   PLAN DETAIL MODAL + PRINT
+   ========================================================================= */
+function openPlanModal(plan){
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 style="font-size:16px;">Catch-up plan — ${esc(plan.teacherName)}</h3>
+        <div style="display:flex; gap:8px;">
+          <button class="btn secondary small" id="btnDownloadPlan">Download / Save as PDF</button>
+          <button class="modal-close" id="modalCloseBtn">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        ${renderPlanDocBody(plan)}
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
+  document.getElementById('btnDownloadPlan').addEventListener('click', ()=>printPlan(plan));
+}
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+function renderPlanDocBody(plan){
+  const pending = plan.lessons.filter(l=>l.completed==='no').length;
+  return `
+  <div class="kv-grid">
+    <div class="kv"><div class="k">Teacher</div><div class="v">${esc(plan.teacherName)}</div></div>
+    <div class="kv"><div class="k">Department</div><div class="v">${esc(plan.department)}</div></div>
+    <div class="kv"><div class="k">Term / ATP Week</div><div class="v">${esc(plan.term)} · ${esc(plan.atpWeek)}</div></div>
+    <div class="kv"><div class="k">Email</div><div class="v" style="font-size:12.5px;">${esc(plan.teacherEmail)}</div></div>
+    <div class="kv"><div class="k">Dates of absence</div><div class="v" style="font-size:12.5px;">${plan.dates.map(fmtDate).join(', ')}</div></div>
+    <div class="kv"><div class="k">Status</div><div class="v">${pending>0?`${pending} lesson(s) need catch-up`:'All work completed'}</div></div>
+  </div>
+  <h3 style="font-size:14.5px; margin-bottom:10px;">Lessons (${plan.lessons.length})</h3>
+  ${plan.lessons.map(l=>`
+    <div class="plandoc-lesson">
+      <div class="plh"><span class="t">${esc(l.period)} — ${esc(l.grade)} ${esc(l.subject)} · ${fmtDate(l.date)}</span>
+        ${l.completed==='no'?'<span class="badge warn">Catch-up needed</span>':'<span class="badge ok">Completed</span>'}</div>
+      <dl>
+        <dt>Topic / work covered</dt><dd>${esc(l.topic)}</dd>
+        ${l.completed==='no' ? `
+        <dt>Catch-up method</dt><dd>${esc(l.method)}</dd>
+        <dt>Catch-up details</dt><dd>${esc(l.details)}</dd>
+        <dt>Resources needed</dt><dd>${esc(l.resources)}</dd>
+        <dt>Due date</dt><dd>${fmtDate(l.dueDate)}</dd>
+        ` : ``}
+      </dl>
+    </div>
+  `).join('')}
+  <p class="subtle" style="margin-top:10px;">Submitted ${nowStampFor(plan.createdAt)}</p>
+  `;
+}
+function nowStampFor(ts){
+  return new Date(ts).toLocaleString('en-ZA', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+}
+
+function printPlan(plan){
+  const area = document.getElementById('printArea');
+  area.innerHTML = `
+    <div class="print-letterhead">
+      ${crestSVG(50)}
+      <div>
+        <h1>PROSPECTUS NOVUS</h1>
+        <div class="ptag">Skool vir leerders met leerhindernisse / School for learners with barriers to learning</div>
+      </div>
+      <div class="pcontact">
+        Tel: (012) 335-5109 / (012) 335-4322<br>
+        admin@prospectusnovus.co.za<br>
+        Fred Nicholson Street, Mayville, Pretoria
+      </div>
+    </div>
+    <h2 style="font-size:16px; margin-bottom:10px;">Teacher's Catch-up Plan for Monitoring, Reflecting &amp; Responding</h2>
+    ${renderPlanDocBody(plan)}
+  `;
+  window.print();
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+render();
+</script>
+</body>
+</html>
