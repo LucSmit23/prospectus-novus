@@ -669,14 +669,36 @@ function bindProfileEvents(){
   });
 
   document.querySelectorAll('[data-addperiod]').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const day = b.dataset.addperiod;
-      const tt = ensureTimetableShape(state.currentUser.timetable);
-      tt[day].push({id:uid(), period:`Period ${tt[day].length+1}`, grade:'', subject:''});
-      state.currentUser.timetable = tt;
-      render();
+  b.addEventListener('click', ()=>{
+
+    const tt = ensureTimetableShape({});
+
+    document.querySelectorAll('.day-block').forEach(block=>{
+      const day = block.dataset.day;
+
+      block.querySelectorAll('.period-row').forEach(row=>{
+        tt[day].push({
+          id: row.dataset.pid,
+          period: row.querySelector('.pt-period').value.trim(),
+          grade: row.querySelector('.pt-grade').value.trim(),
+          subject: row.querySelector('.pt-subject').value.trim()
+        });
+      });
     });
+
+    const day = b.dataset.addperiod;
+
+    tt[day].push({
+      id: uid(),
+      period: `Period ${tt[day].length + 1}`,
+      grade: "",
+      subject: ""
+    });
+
+    state.currentUser.timetable = tt;
+    render();
   });
+});
   document.querySelectorAll('[data-rmperiod]').forEach(b=>{
     b.addEventListener('click', ()=>{
       const [day,pid] = b.dataset.rmperiod.split('|');
