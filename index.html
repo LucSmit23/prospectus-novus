@@ -414,14 +414,53 @@ async function listAllUsers(){
 
     return data || [];
 }
-async function savePlan(p){ return storeSet(planKey(p.teacherEmail,p.id), p); }
+async function savePlan(p){
+
+    const { error } = await window.db
+        .from("plans")
+        .upsert([{
+            id: p.id,
+            teacheremail: p.teacherEmail,
+            data: p
+        }]);
+
+    if(error){
+        console.error(error);
+        return null;
+    }
+
+    return p;
+}
 async function listPlansForTeacher(email){
-  const list = await storeListValues("plan:"+email.trim().toLowerCase()+":");
-  return list.sort((a,b)=> b.createdAt - a.createdAt);
+
+    const { data, error } = await window.db
+        .from("plans")
+        .select("data")
+        .eq("teacheremail", email.trim().toLowerCase());
+
+    if(error){
+        console.error(error);
+        return [];
+    }
+
+    return (data || [])
+        .map(r => r.data)
+        .sort((a,b) => b.createdAt - a.createdAt);
 }
 async function listAllPlans(){
-  const list = await storeListValues("plan:");
-  return list.sort((a,b)=> b.createdAt - a.createdAt);
+
+    const { data, error } = await window.db
+        .from("plans")
+        .select("data");
+
+    if(error){
+        console.error(error);
+        return [];
+    }
+
+    return (data || [])
+        .map(r => r.data)
+        .sort((a,b) => b.createdAt - a.createdAt);
 }
 
 /* ---------------- app state ---------------- */
