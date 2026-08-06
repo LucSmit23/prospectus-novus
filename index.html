@@ -963,7 +963,17 @@ function renderDateLessonSection(dateIso, tt, draft){
       <div class="banner-note">No timetable saved for ${day}. Add it under <b>My Profile &amp; Timetable</b>, or add a lesson manually below.</div>
       <button class="btn secondary small" data-manualadd="${dateIso}">+ Add lesson manually</button>
     ` : `
-      <div class="periodpicklist">
+      <div style="margin-bottom:10px;">
+  <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
+    <input
+      type="checkbox"
+      data-selectall
+      data-date="${dateIso}">
+    Select all periods for this day
+  </label>
+</div>
+
+<div class="periodpicklist">
         ${periods.map(p=>`
           <label class="periodpick ${checkedIds.has(p.period)?'checked':''}">
             <input type="checkbox" data-pickperiod data-date="${dateIso}" data-day="${day}" data-period="${esc(p.period)}" data-grade="${esc(p.grade)}" data-subject="${esc(p.subject)}" ${checkedIds.has(p.period)?'checked':''}>
@@ -1071,7 +1081,25 @@ function bindNewPlanEvents(){
       render();
     });
   });
+document.querySelectorAll('[data-selectall]').forEach(box=>{
 
+  box.addEventListener('change', ()=>{
+
+    const date = box.dataset.date;
+
+    document.querySelectorAll(
+      `[data-pickperiod][data-date="${date}"]`
+    ).forEach(cb=>{
+
+      if(cb.checked !== box.checked){
+        cb.click();
+      }
+
+    });
+
+  });
+
+});
   document.querySelectorAll('[data-manualadd]').forEach(b=>{
     b.addEventListener('click', ()=>{
       if(d.lessons.length >= MAX_LESSONS) return;
