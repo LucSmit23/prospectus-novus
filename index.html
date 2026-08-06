@@ -1000,7 +1000,21 @@ function renderLessonCard(l){
     <div class="lhead">
       <div class="lh-l">
         <span class="badgeicon">${badgeIcon(l.completed)}</span>
-        <div><h4>${esc(l.period)} — ${esc(l.grade)||'Grade —'} ${esc(l.subject)||''}</h4><div class="lsub">${fmtDate(l.date)}</div></div>
+        <div>
+ <h4>${esc(l.period)} — ${esc(l.grade)||'Grade —'} ${esc(l.subject)||''}</h4>
+  <div class="lsub">${fmtDate(l.date)}</div>
+  ${l.period !== "Period 1" ? `
+<label class="combine-label" style="display:block;margin-top:8px;">
+  <input
+    type="checkbox"
+    class="combinePrev"
+    data-id="${l.id}"
+    ${l.combinedWithPrevious ? "checked" : ""}
+  >
+  Same lesson as previous period
+</label>
+` : ""}
+</div>
       </div>
       <button class="btn danger small" data-rmlesson="${l.id}">Remove</button>
     </div>
@@ -1129,7 +1143,22 @@ document.querySelectorAll('[data-selectall]').forEach(box=>{
       if(period===null) return;
       const grade = prompt("Grade (e.g. Grade 5):","") || "";
       const subject = prompt("Subject (e.g. Natural Sciences):","") || "";
-      d.lessons.push({ id:uid(), date:dateIso, day:weekdayName(dateIso), period:period||"Lesson", grade, subject, topic:'', completed:'', method:'', dueDate:'', details:'', resources:'', manual:true });
+     d.lessons.push({
+    id: uid(),
+    date: dateIso,
+    day: weekdayName(dateIso),
+    period: period || "Lesson",
+    grade,
+    subject,
+    topic:"",
+    completed:"",
+    method:"",
+    dueDate:"",
+    details:"",
+    resources:"",
+    combinedWithPrevious:false,
+    manual:true
+});
       render();
     });
   });
@@ -1139,7 +1168,20 @@ document.querySelectorAll('[data-selectall]').forEach(box=>{
       const {date, day, period, grade, subject} = cb.dataset;
       if(cb.checked){
         if(d.lessons.length >= MAX_LESSONS){ cb.checked = false; alert(`You can log up to ${MAX_LESSONS} lessons in one catch-up plan.`); return; }
-        d.lessons.push({ id:uid(), date, day, period, grade, subject, topic:'', completed:'', method:'', dueDate:'', details:'', resources:'' });
+d.lessons.push({
+    id: uid(),
+    date,
+    day,
+    period,
+    grade,
+    subject,
+    topic:"",
+    completed:"",
+    method:"",
+    dueDate:"",
+    details:"",
+    resources:""
+});
       } else {
         d.lessons = d.lessons.filter(l=>!(l.date===date && l.period===period));
       }
@@ -1175,7 +1217,15 @@ document.querySelectorAll('[data-selectall]').forEach(box=>{
 
   document.getElementById('btnSubmitPlan').addEventListener('click', submitPlan);
 }
+document.querySelectorAll(".lesson-complete").forEach(box=>{
+    box.addEventListener("change", ()=>{
+        const lesson = findLesson(box.dataset.lessonid);
+        if(!lesson) return;
 
+        lesson.lessonCompleted = box.checked;
+    });
+});
+  
 function validateDraft(){
   const d = state.draftPlan;
   let ok = true;
