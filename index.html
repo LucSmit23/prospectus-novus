@@ -1087,22 +1087,8 @@ function bindNewPlanEvents(){
       render();
     });
   }
-document.querySelectorAll('[data-selectall]').forEach(box=>{
-
-  box.addEventListener('change', ()=>{
-document.querySelectorAll('.combinePrev').forEach(box=>{
-    box.addEventListener('change',()=>{
-
-        const lesson = state.draftPlan.lessons.find(
-            l => l.id === box.dataset.id
-        );
 
         if(!lesson) return;
-
-        lesson.combinedWithPrevious = box.checked;
-
-    });
-});
     
     const date = box.dataset.date;
 
@@ -1125,25 +1111,6 @@ document.querySelectorAll('.combinePrev').forEach(box=>{
       }
 
     }
-
-  });
-
-});
-document.querySelectorAll('[data-selectall]').forEach(box=>{
-
-  box.addEventListener('change', ()=>{
-
-    const date = box.dataset.date;
-
-    document.querySelectorAll(
-      `[data-pickperiod][data-date="${date}"]`
-    ).forEach(cb=>{
-
-      if(cb.checked !== box.checked){
-        cb.click();
-      }
-
-    });
 
   });
 
@@ -1193,7 +1160,8 @@ d.lessons.push({
     method:"",
     dueDate:"",
     details:"",
-    resources:""
+   resources:"",
+combinedWithPrevious:false
 });
       } else {
         d.lessons = d.lessons.filter(l=>!(l.date===date && l.period===period));
@@ -1216,6 +1184,15 @@ d.lessons.push({
       render();
     });
   });
+  document.querySelectorAll('.combinePrev').forEach(box=>{
+    box.addEventListener('change', ()=>{
+        const l = findLesson(box.dataset.id);
+        if(!l) return;
+
+        l.combinedWithPrevious = box.checked;
+        render();
+    });
+});
 
   document.querySelectorAll('[data-field]').forEach(inp=>{
     inp.addEventListener('input', ()=>{
@@ -1230,7 +1207,7 @@ d.lessons.push({
 
   document.getElementById('btnSubmitPlan').addEventListener('click', submitPlan);
 }
-document.querySelectorAll(".lesson-complete").forEach(box=>{
+  document.querySelectorAll(".lesson-complete").forEach(box=>{
     box.addEventListener("change", ()=>{
         const lesson = findLesson(box.dataset.lessonid);
         if(!lesson) return;
