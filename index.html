@@ -964,29 +964,13 @@ function renderDateLessonSection(dateIso, tt, draft){
       <button class="btn secondary small" data-manualadd="${dateIso}">+ Add lesson manually</button>
     ` : `
       <div class="periodpicklist">
-        ${periods.map((p,index)=>`
-  <div class="periodpick ${checkedIds.has(p.period)?'checked':''}">
-      <label style="display:flex;align-items:center;gap:12px;flex:1;">
-          <input
-              type="checkbox"
-              data-pickperiod
-              data-date="${dateIso}"
-              data-day="${day}"
-              data-period="${esc(p.period)}"
-              data-grade="${esc(p.grade)}"
-              data-subject="${esc(p.subject)}"
-              ${checkedIds.has(p.period)?'checked':''}
-          >
-
-          <span class="pp-info">
-              <b>${esc(p.period)}</b> —
-              ${esc(p.grade)||'<i>grade not set</i>'}
-              ·
-              ${esc(p.subject)||'<i>subject not set</i>'}
-          </span>
-      </label>
-  </div>
-`).join('')}
+        ${periods.map(p=>`
+          <label class="periodpick ${checkedIds.has(p.period)?'checked':''}">
+            <input type="checkbox" data-pickperiod data-date="${dateIso}" data-day="${day}" data-period="${esc(p.period)}" data-grade="${esc(p.grade)}" data-subject="${esc(p.subject)}" ${checkedIds.has(p.period)?'checked':''}>
+            <span class="pp-info"><b>${esc(p.period)}</b> — ${esc(p.grade)||'<i>grade not set</i>'} · ${esc(p.subject)||'<i>subject not set</i>'}</span>
+          </label>
+        `).join('')}
+      </div>
     `}
     <div id="lessonsFor-${dateIso}" style="margin-top:14px;">
       ${lessonsForDate.map(l=>renderLessonCard(l)).join('')}
@@ -1103,57 +1087,16 @@ function bindNewPlanEvents(){
 
   document.querySelectorAll('[data-pickperiod]').forEach(cb=>{
     cb.addEventListener('change', ()=>{
-
-        const {date, day, period, grade, subject} = cb.dataset;
-
-        const row = cb.closest('.periodpick');
-        const type = row.querySelector('.doublePeriodSelect').value;
-
-        if(cb.checked){
-
-            if(d.lessons.length >= MAX_LESSONS){
-                cb.checked = false;
-                alert(`You can log up to ${MAX_LESSONS} lessons in one catch-up plan.`);
-                return;
-            }
-
-            d.lessons.push({
-                id:uid(),
-                date,
-                day,
-period: period,
-                grade,
-                subject,
-                topic:'',
-                completed:'',
-                method:'',
-                dueDate:'',
-                details:'',
-                resources:''
-            });
-
-        }else{
-
-           d.lessons = d.lessons.filter(l => {
-    if (l.date !== date) return true;
-
-    if (l.period === period) return false;
-
-    if (l.period.startsWith("Periods ")) {
-        const nums = l.period.replace("Periods ", "").split("-");
-        if (nums.includes(period.replace("Period ", ""))) {
-            return false;
-        }
-    }
-
-    return true;
-});
-        }
-
-        render();
-
+      const {date, day, period, grade, subject} = cb.dataset;
+      if(cb.checked){
+        if(d.lessons.length >= MAX_LESSONS){ cb.checked = false; alert(`You can log up to ${MAX_LESSONS} lessons in one catch-up plan.`); return; }
+        d.lessons.push({ id:uid(), date, day, period, grade, subject, topic:'', completed:'', method:'', dueDate:'', details:'', resources:'' });
+      } else {
+        d.lessons = d.lessons.filter(l=>!(l.date===date && l.period===period));
+      }
+      render();
     });
-});
+  });
 
   document.querySelectorAll('[data-rmlesson]').forEach(b=>{
     b.addEventListener('click', ()=>{
