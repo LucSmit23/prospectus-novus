@@ -1117,16 +1117,63 @@ function bindNewPlanEvents(){
 
   document.querySelectorAll('[data-pickperiod]').forEach(cb=>{
     cb.addEventListener('change', ()=>{
-      const {date, day, period, grade, subject} = cb.dataset;
-      if(cb.checked){
-        if(d.lessons.length >= MAX_LESSONS){ cb.checked = false; alert(`You can log up to ${MAX_LESSONS} lessons in one catch-up plan.`); return; }
-        d.lessons.push({ id:uid(), date, day, period, grade, subject, topic:'', completed:'', method:'', dueDate:'', details:'', resources:'' });
-      } else {
-        d.lessons = d.lessons.filter(l=>!(l.date===date && l.period===period));
-      }
-      render();
+
+        const {date, day, period, grade, subject} = cb.dataset;
+
+        const row = cb.closest('.periodpick');
+        const type = row.querySelector('.doublePeriodSelect').value;
+
+        if(cb.checked){
+
+            if(d.lessons.length >= MAX_LESSONS){
+                cb.checked = false;
+                alert(`You can log up to ${MAX_LESSONS} lessons in one catch-up plan.`);
+                return;
+            }
+
+            let periodLabel = period;
+
+            if(type === "2"){
+                const nextRow = row.nextElementSibling;
+                if(nextRow){
+                    const nextCheckbox = nextRow.querySelector('[data-pickperiod]');
+                    if(nextCheckbox){
+
+                        const nextPeriod = nextCheckbox.dataset.period.replace("Period ","");
+
+                        periodLabel =
+                            period.replace("Period ","Periods ")
+                            + "-" +
+                            nextPeriod;
+                    }
+                }
+            }
+
+            d.lessons.push({
+                id:uid(),
+                date,
+                day,
+                period: periodLabel,
+                grade,
+                subject,
+                topic:'',
+                completed:'',
+                method:'',
+                dueDate:'',
+                details:'',
+                resources:''
+            });
+
+        }else{
+
+            d.lessons = d.lessons.filter(l=>!(l.date===date && l.period.startsWith(period)));
+
+        }
+
+        render();
+
     });
-  });
+});
 
   document.querySelectorAll('[data-rmlesson]').forEach(b=>{
     b.addEventListener('click', ()=>{
