@@ -1090,7 +1090,20 @@ function bindNewPlanEvents(){
 document.querySelectorAll('[data-selectall]').forEach(box=>{
 
   box.addEventListener('change', ()=>{
+document.querySelectorAll('.combinePrev').forEach(box=>{
+    box.addEventListener('change',()=>{
 
+        const lesson = state.draftPlan.lessons.find(
+            l => l.id === box.dataset.id
+        );
+
+        if(!lesson) return;
+
+        lesson.combinedWithPrevious = box.checked;
+
+    });
+});
+    
     const date = box.dataset.date;
 
     const checkboxes = Array.from(
