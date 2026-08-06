@@ -1166,8 +1166,20 @@ function bindNewPlanEvents(){
 
         }else{
 
-            d.lessons = d.lessons.filter(l=>!(l.date===date && l.period.startsWith(period)));
+           d.lessons = d.lessons.filter(l => {
+    if (l.date !== date) return true;
 
+    if (l.period === period) return false;
+
+    if (l.period.startsWith("Periods ")) {
+        const nums = l.period.replace("Periods ", "").split("-");
+        if (nums.includes(period.replace("Period ", ""))) {
+            return false;
+        }
+    }
+
+    return true;
+});
         }
 
         render();
