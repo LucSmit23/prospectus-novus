@@ -964,13 +964,43 @@ function renderDateLessonSection(dateIso, tt, draft){
       <button class="btn secondary small" data-manualadd="${dateIso}">+ Add lesson manually</button>
     ` : `
       <div class="periodpicklist">
-        ${periods.map(p=>`
-          <label class="periodpick ${checkedIds.has(p.period)?'checked':''}">
-            <input type="checkbox" data-pickperiod data-date="${dateIso}" data-day="${day}" data-period="${esc(p.period)}" data-grade="${esc(p.grade)}" data-subject="${esc(p.subject)}" ${checkedIds.has(p.period)?'checked':''}>
-            <span class="pp-info"><b>${esc(p.period)}</b> — ${esc(p.grade)||'<i>grade not set</i>'} · ${esc(p.subject)||'<i>subject not set</i>'}</span>
-          </label>
-        `).join('')}
-      </div>
+        ${periods.map((p,index)=>`
+  <div class="periodpick ${checkedIds.has(p.period)?'checked':''}">
+      <label style="display:flex;align-items:center;gap:12px;flex:1;">
+          <input
+              type="checkbox"
+              data-pickperiod
+              data-date="${dateIso}"
+              data-day="${day}"
+              data-period="${esc(p.period)}"
+              data-grade="${esc(p.grade)}"
+              data-subject="${esc(p.subject)}"
+              ${checkedIds.has(p.period)?'checked':''}
+          >
+
+          <span class="pp-info">
+              <b>${esc(p.period)}</b> —
+              ${esc(p.grade)||'<i>grade not set</i>'}
+              ·
+              ${esc(p.subject)||'<i>subject not set</i>'}
+          </span>
+      </label>
+
+      <select
+          class="doublePeriodSelect"
+          data-period="${esc(p.period)}">
+
+          <option value="1">Single</option>
+
+          ${
+            index < periods.length-1
+            ? '<option value="2">Double Period</option>'
+            : ''
+          }
+
+      </select>
+  </div>
+`).join('')}
     `}
     <div id="lessonsFor-${dateIso}" style="margin-top:14px;">
       ${lessonsForDate.map(l=>renderLessonCard(l)).join('')}
