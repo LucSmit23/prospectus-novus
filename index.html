@@ -985,20 +985,6 @@ function renderDateLessonSection(dateIso, tt, draft){
               ${esc(p.subject)||'<i>subject not set</i>'}
           </span>
       </label>
-
-      <select
-          class="doublePeriodSelect"
-          data-period="${esc(p.period)}">
-
-          <option value="1">Single</option>
-
-          ${
-            index < periods.length-1
-            ? '<option value="2">Double Period</option>'
-            : ''
-          }
-
-      </select>
   </div>
 `).join('')}
     `}
@@ -1131,29 +1117,11 @@ function bindNewPlanEvents(){
                 return;
             }
 
-            let periodLabel = period;
-
-            if(type === "2"){
-                const nextRow = row.nextElementSibling;
-                if(nextRow){
-                    const nextCheckbox = nextRow.querySelector('[data-pickperiod]');
-                    if(nextCheckbox){
-
-                        const nextPeriod = nextCheckbox.dataset.period.replace("Period ","");
-
-                        periodLabel =
-                            period.replace("Period ","Periods ")
-                            + "-" +
-                            nextPeriod;
-                    }
-                }
-            }
-
             d.lessons.push({
                 id:uid(),
                 date,
                 day,
-                period: periodLabel,
+period: period,
                 grade,
                 subject,
                 topic:'',
