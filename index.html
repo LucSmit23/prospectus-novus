@@ -1073,14 +1073,35 @@ function bindNewPlanEvents(){
       render();
     });
   }
-  document.querySelectorAll('[data-rmdate]').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const dt = b.dataset.rmdate;
-      d.dates = d.dates.filter(x=>x!==dt);
-      d.lessons = d.lessons.filter(l=>l.date!==dt);
-      render();
-    });
+document.querySelectorAll('[data-selectall]').forEach(box=>{
+
+  box.addEventListener('change', ()=>{
+
+    const date = box.dataset.date;
+
+    const checkboxes = Array.from(
+      document.querySelectorAll(
+        `[data-pickperiod][data-date="${date}"]`
+      )
+    );
+
+    for(const cb of checkboxes){
+
+      if(cb.checked !== box.checked){
+
+        cb.checked = box.checked;
+
+        cb.dispatchEvent(
+          new Event("change",{bubbles:true})
+        );
+
+      }
+
+    }
+
   });
+
+});
 document.querySelectorAll('[data-selectall]').forEach(box=>{
 
   box.addEventListener('change', ()=>{
